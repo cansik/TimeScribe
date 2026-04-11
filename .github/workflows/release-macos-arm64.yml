@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -62,7 +62,7 @@ jobs:
           tools: composer
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
@@ -72,13 +72,15 @@ jobs:
           composer install --no-interaction --no-progress --prefer-dist
           npm ci
 
-      - name: Build web assets
-        run: npm run build
+      - name: Prepare Laravel environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction --force
 
       - name: Build macOS arm64 app
         env:
           NATIVEPHP_APP_VERSION: ${{ steps.version.outputs.version }}
-        run: php artisan native:build mac --no-interaction
+        run: php artisan native:build mac arm64 --no-interaction
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
