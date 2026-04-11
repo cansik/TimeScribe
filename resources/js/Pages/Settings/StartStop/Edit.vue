@@ -11,6 +11,7 @@ import { ref, watch } from 'vue'
 const props = defineProps<{
     stopBreakAutomatic?: string
     stopBreakAutomaticActivationTime?: string
+    stopBreakAutomaticGraceTime?: number
     stopWorkTimeReset?: number
     stopBreakTimeReset?: number
 }>()
@@ -18,6 +19,7 @@ const props = defineProps<{
 const form = useForm({
     stopBreakAutomatic: props.stopBreakAutomatic ?? '',
     stopBreakAutomaticActivationTime: props.stopBreakAutomaticActivationTime ?? '',
+    stopBreakAutomaticGraceTime: props.stopBreakAutomaticGraceTime?.toString() ?? '0',
     stopWorkTimeReset: props.stopWorkTimeReset?.toString() ?? '0',
     stopBreakTimeReset: props.stopBreakTimeReset?.toString() ?? '0'
 })
@@ -40,6 +42,7 @@ watch(
         form.stopBreakTimeReset,
         form.stopBreakAutomatic,
         form.stopBreakAutomaticActivationTime,
+        form.stopBreakAutomaticGraceTime,
         form.stopWorkTimeReset
     ],
     debouncedSubmit,
@@ -48,6 +51,7 @@ watch(
 watch(stopBreakAutomatikCheck, () => {
     if (stopBreakAutomatikCheck.value === false) {
         form.stopBreakAutomatic = ''
+        form.stopBreakAutomaticGraceTime = '0'
         stopBreakAutomatikActivationCheck.value = false
     }
 })
@@ -100,6 +104,71 @@ watch(stopTimeResetCheck, () => {
                         </SelectItem>
                     </SelectContent>
                 </Select>
+
+                <div class="mt-4 flex items-start gap-4" v-if="form.stopBreakAutomatic === 'break'">
+                    <div class="flex-1 space-y-1">
+                        <p class="text-sm leading-none font-medium">
+                            {{ $t('app.start break after:') }}
+                        </p>
+                        <p class="text-muted-foreground text-sm">
+                            {{
+                                $t(
+                                    'app.if you unlock the computer before the selected time, the break is discarded and work continues.'
+                                )
+                            }}
+                        </p>
+                    </div>
+                    <Select v-model="form.stopBreakAutomaticGraceTime">
+                        <SelectTrigger class="w-1/2">
+                            <SelectValue :placeholder="$t('app.time')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="0">
+                                {{ $t('app.immediately') }}
+                            </SelectItem>
+                            <SelectItem value="5">
+                                5
+                                {{ $t('app.minutes') }}
+                            </SelectItem>
+                            <SelectItem value="10">
+                                10
+                                {{ $t('app.minutes') }}
+                            </SelectItem>
+                            <SelectItem value="20">
+                                20
+                                {{ $t('app.minutes') }}
+                            </SelectItem>
+                            <SelectItem value="30">
+                                30
+                                {{ $t('app.minutes') }}
+                            </SelectItem>
+                            <SelectItem value="40">
+                                40
+                                {{ $t('app.minutes') }}
+                            </SelectItem>
+                            <SelectItem value="50">
+                                50
+                                {{ $t('app.minutes') }}
+                            </SelectItem>
+                            <SelectItem value="60">
+                                1:00
+                                {{ $t('app.hour') }}
+                            </SelectItem>
+                            <SelectItem value="90">
+                                1:30
+                                {{ $t('app.hour') }}
+                            </SelectItem>
+                            <SelectItem value="120">
+                                2:00
+                                {{ $t('app.hours') }}
+                            </SelectItem>
+                            <SelectItem value="150">
+                                2:30
+                                {{ $t('app.hours') }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
         </div>
         <div class="flex items-start space-x-4 py-4" v-if="stopBreakAutomatikCheck">

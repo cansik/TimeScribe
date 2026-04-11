@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Jobs\CalculateWeekBalance;
+use App\Jobs\MenubarRefresh;
 use App\Services\LocaleService;
 use App\Services\TimestampService;
 use App\Settings\GeneralSettings;
@@ -20,7 +21,13 @@ class Unlocked
     {
         new LocaleService;
         $settings = resolve(GeneralSettings::class);
+        $restoredPendingAutoBreak = TimestampService::restorePendingAutoBreak();
+
         TimestampService::checkStopTimeReset();
+
+        if ($restoredPendingAutoBreak) {
+            dispatch_sync(new MenubarRefresh);
+        }
 
         if ($settings->showTimerOnUnlock) {
             MenuBar::clearResolvedInstances();
