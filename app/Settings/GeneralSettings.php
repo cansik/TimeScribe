@@ -22,6 +22,8 @@ class GeneralSettings extends Settings
 
     public ?string $stopBreakAutomaticActivationTime = null;
 
+    public int $stopBreakAutomaticBreakThreshold = 0;
+
     public ?int $stopWorkTimeReset = null;
 
     public ?int $stopBreakTimeReset = null;

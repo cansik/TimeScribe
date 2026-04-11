@@ -64,6 +64,8 @@ return [
     'consider public holidays' => '考虑公共假期',
     'consumed' => '已占用',
     'continue' => '继续',
+    'count break after:' => 'Count break after:',
+    'only count automatic breaks when inactivity reaches this duration.' => 'Only count automatic breaks when inactivity reaches this duration.',
     'count vacation time in fractions of a day based on scheduled hours.' => '根据计划工时按天数比例计算休假。',
     'create a new project to track project times.' => '创建一个新项目来跟踪项目时间。',
     'create a work schedule to start tracking hours and vacation correctly.' => '这样工时和休假从一开始就保持一致。',

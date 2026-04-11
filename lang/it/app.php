@@ -64,6 +64,8 @@ return [
     'consider public holidays' => 'Considera festività pubbliche',
     'consumed' => 'Consumato',
     'continue' => 'Continua',
+    'count break after:' => 'Count break after:',
+    'only count automatic breaks when inactivity reaches this duration.' => 'Only count automatic breaks when inactivity reaches this duration.',
     'count vacation time in fractions of a day based on scheduled hours.' => 'Conta il tempo di ferie in frazioni di giorno basate sulle ore pianificate.',
     'create a new project to track project times.' => 'Crea un nuovo progetto per tracciare i tempi del progetto.',
     'create a work schedule to start tracking hours and vacation correctly.' => 'Crea un orario di lavoro per iniziare a tracciare correttamente ore e ferie.',

@@ -6,6 +6,7 @@ namespace App\Listeners;
 
 use App\Enums\TimestampTypeEnum;
 use App\Jobs\MenubarRefresh;
+use App\Models\Timestamp;
 use App\Services\LocaleService;
 use App\Services\TimestampService;
 use App\Settings\GeneralSettings;
@@ -41,6 +42,20 @@ class StandbyOrLocked
 
         if (TimestampService::getCurrentType() === TimestampTypeEnum::WORK) {
             if ($stopBreakAutomatic === 'break') {
+                $activeWorkTimestamp = Timestamp::whereNull('ended_at')
+                    ->where('type', TimestampTypeEnum::WORK)
+                    ->first();
+
+                if (! $activeWorkTimestamp) {
+                    return;
+                }
+
+                $lastSeenAt = $activeWorkTimestamp->last_ping_at ?? $activeWorkTimestamp->started_at;
+
+                if ($lastSeenAt->diffInMinutes(Date::now()) < $settings->stopBreakAutomaticBreakThreshold) {
+                    return;
+                }
+
                 TimestampService::startBreak();
             }
             if ($stopBreakAutomatic === 'stop') {

@@ -11,6 +11,7 @@ import { ref, watch } from 'vue'
 const props = defineProps<{
     stopBreakAutomatic?: string
     stopBreakAutomaticActivationTime?: string
+    stopBreakAutomaticBreakThreshold?: number
     stopWorkTimeReset?: number
     stopBreakTimeReset?: number
 }>()
@@ -18,6 +19,7 @@ const props = defineProps<{
 const form = useForm({
     stopBreakAutomatic: props.stopBreakAutomatic ?? '',
     stopBreakAutomaticActivationTime: props.stopBreakAutomaticActivationTime ?? '',
+    stopBreakAutomaticBreakThreshold: props.stopBreakAutomaticBreakThreshold?.toString() ?? '0',
     stopWorkTimeReset: props.stopWorkTimeReset?.toString() ?? '0',
     stopBreakTimeReset: props.stopBreakTimeReset?.toString() ?? '0'
 })
@@ -40,6 +42,7 @@ watch(
         form.stopBreakTimeReset,
         form.stopBreakAutomatic,
         form.stopBreakAutomaticActivationTime,
+        form.stopBreakAutomaticBreakThreshold,
         form.stopWorkTimeReset
     ],
     debouncedSubmit,
@@ -48,6 +51,7 @@ watch(
 watch(stopBreakAutomatikCheck, () => {
     if (stopBreakAutomatikCheck.value === false) {
         form.stopBreakAutomatic = ''
+        form.stopBreakAutomaticBreakThreshold = '0'
         stopBreakAutomatikActivationCheck.value = false
     }
 })
@@ -100,6 +104,25 @@ watch(stopTimeResetCheck, () => {
                         </SelectItem>
                     </SelectContent>
                 </Select>
+
+                <div class="mt-4 ml-auto w-1/2" v-if="stopBreakAutomatikCheck && form.stopBreakAutomatic === 'break'">
+                    <p class="mb-2 text-sm leading-none">
+                        {{ $t('app.count break after:') }}
+                    </p>
+                    <Select v-model="form.stopBreakAutomaticBreakThreshold">
+                        <SelectTrigger class="w-full">
+                            <SelectValue :placeholder="$t('app.minutes')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :key="minute" :value="minute.toString()" v-for="minute in [0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60]">
+                                {{ minute }} {{ $t('app.minutes') }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <p class="text-muted-foreground mt-2 text-xs italic">
+                        {{ $t('app.only count automatic breaks when inactivity reaches this duration.') }}
+                    </p>
+                </div>
             </div>
         </div>
         <div class="flex items-start space-x-4 py-4" v-if="stopBreakAutomatikCheck">

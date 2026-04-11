@@ -64,6 +64,8 @@ return [
     'consider public holidays' => 'Medtag helligdage',
     'consumed' => 'Forbrugt',
     'continue' => 'Fortsæt',
+    'count break after:' => 'Count break after:',
+    'only count automatic breaks when inactivity reaches this duration.' => 'Only count automatic breaks when inactivity reaches this duration.',
     'count vacation time in fractions of a day based on scheduled hours.' => 'Beregn ferietid i brøkdele af en dag baseret på planlagte timer.',
     'create a new project to track project times.' => 'Opret et nyt projekt for at registrere projekttider.',
     'create a work schedule to start tracking hours and vacation correctly.' => 'Opret en arbejdsplan for at holde timer og ferie i sync.',
