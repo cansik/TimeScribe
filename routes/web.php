@@ -70,6 +70,7 @@ Route::get('welcome/finish/{openSettings?}', [WelcomeController::class, 'finish'
 Route::name('menubar.')->prefix('menubar')->group(function (): void {
     Route::get('', [MenubarController::class, 'index'])->name('index');
     Route::post('break', [MenubarController::class, 'storeBreak'])->name('storeBreak');
+    Route::post('discard-break', [MenubarController::class, 'discardBreak'])->name('discardBreak');
     Route::post('work', [MenubarController::class, 'storeWork'])->name('storeWork');
     Route::post('stop', [MenubarController::class, 'storeStop'])->name('storeStop');
     Route::post('set-project/{project}', [MenubarController::class, 'setProject'])->name('set-project');

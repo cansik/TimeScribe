@@ -27,6 +27,7 @@ class UpdateStartStopSettingsRequest extends FormRequest
         return [
             'stopBreakAutomatic' => ['nullable', 'string'],
             'stopBreakAutomaticActivationTime' => ['nullable', 'integer', 'min:13', 'max:23'],
+            'stopBreakAutomaticGraceTime' => ['nullable', 'integer', 'min:0', 'max:150'],
             'stopWorkTimeReset' => ['nullable', 'string'],
             'stopBreakTimeReset' => ['nullable', 'string'],
         ];

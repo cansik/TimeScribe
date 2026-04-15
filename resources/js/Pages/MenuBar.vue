@@ -5,7 +5,7 @@ import BasicLayout from '@/Layouts/BasicLayout.vue'
 import { secToFormat } from '@/lib/utils'
 import { ActivityHistory, Project } from '@/types'
 import { Head, Link, router, usePoll } from '@inertiajs/vue3'
-import { ChartColumnBig, Coffee, Cog, PictureInPicture, Play, Plus, Sparkles, Square, Tag, X } from '@lucide/vue'
+import { ChartColumnBig, Coffee, Cog, PictureInPicture, Play, Plus, Sparkles, Square, Tag, Undo2, X } from '@lucide/vue'
 import { useColorMode } from '@vueuse/core'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
@@ -17,6 +17,7 @@ const props = defineProps<{
     currentType?: 'work' | 'break'
     workTime: number
     breakTime: number
+    hasPendingAutoBreak: boolean
     currentProject?: Project
     currentAppActivity?: ActivityHistory
     activeAppActivity: boolean
@@ -68,7 +69,7 @@ const tick = () => {
 const reload = () => {
     router.flushAll()
     router.reload({
-        only: ['workTime', 'breakTime', 'currentType', 'currentProject'],
+        only: ['workTime', 'breakTime', 'currentType', 'currentProject', 'hasPendingAutoBreak'],
         showProgress: false,
         onFinish: clearAutoFocus
     })
@@ -405,68 +406,86 @@ const removeProject = () => {
                     <Tag class="size-4" />
                 </Button>
             </div>
-            <div class="bg-muted dark:bg-muted/60 flex gap-2 p-2">
+            <div class="bg-muted dark:bg-muted/60 flex flex-col gap-2 p-2">
+                <div class="flex gap-2">
+                    <Button
+                        :as="Link"
+                        :disabled="loading"
+                        :href="route('menubar.storeWork')"
+                        @click="router.flushAll()"
+                        class="flex-1 shrink-0 px-0 disabled:opacity-100"
+                        method="POST"
+                        preserve-scroll
+                        preserve-state
+                        size="lg"
+                        v-if="props.currentType === null"
+                    >
+                        <Play />
+                        {{ $t('app.start') }}
+                    </Button>
+                    <Button
+                        :as="Link"
+                        :disabled="loading"
+                        :href="route('menubar.storeStop')"
+                        @click="router.flushAll()"
+                        class="flex-1 shrink-0 px-0 disabled:opacity-100"
+                        method="POST"
+                        preserve-scroll
+                        preserve-state
+                        size="lg"
+                        v-if="props.currentType !== null"
+                        variant="destructive"
+                    >
+                        <Square />
+                        {{ $t('app.stop') }}
+                    </Button>
+                    <Button
+                        :as="Link"
+                        :disabled="loading"
+                        :href="route('menubar.storeBreak')"
+                        @click="router.flushAll()"
+                        class="flex-1 shrink-0 px-0 disabled:opacity-100"
+                        method="POST"
+                        preserve-scroll
+                        preserve-state
+                        size="lg"
+                        v-if="props.currentType === 'work'"
+                        variant="outline"
+                    >
+                        <Coffee />
+                        {{ $t('app.break') }}
+                    </Button>
+                    <Button
+                        :as="Link"
+                        :disabled="loading"
+                        :href="route('menubar.storeWork')"
+                        @click="router.flushAll()"
+                        class="flex-1 shrink-0 px-0 disabled:opacity-100"
+                        method="POST"
+                        preserve-scroll
+                        preserve-state
+                        size="lg"
+                        v-if="props.currentType === 'break'"
+                    >
+                        <Play />
+                        {{ $t('app.continue') }}
+                    </Button>
+                </div>
                 <Button
                     :as="Link"
                     :disabled="loading"
-                    :href="route('menubar.storeWork')"
+                    :href="route('menubar.discardBreak')"
                     @click="router.flushAll()"
-                    class="flex-1 shrink-0 px-0 disabled:opacity-100"
+                    class="w-full px-0 disabled:opacity-100"
                     method="POST"
                     preserve-scroll
                     preserve-state
                     size="lg"
-                    v-if="props.currentType === null"
-                >
-                    <Play />
-                    {{ $t('app.start') }}
-                </Button>
-                <Button
-                    :as="Link"
-                    :disabled="loading"
-                    :href="route('menubar.storeStop')"
-                    @click="router.flushAll()"
-                    class="flex-1 shrink-0 px-0 disabled:opacity-100"
-                    method="POST"
-                    preserve-scroll
-                    preserve-state
-                    size="lg"
-                    v-if="props.currentType !== null"
-                    variant="destructive"
-                >
-                    <Square />
-                    {{ $t('app.stop') }}
-                </Button>
-                <Button
-                    :as="Link"
-                    :disabled="loading"
-                    :href="route('menubar.storeBreak')"
-                    @click="router.flushAll()"
-                    class="flex-1 shrink-0 px-0 disabled:opacity-100"
-                    method="POST"
-                    preserve-scroll
-                    preserve-state
-                    size="lg"
-                    v-if="props.currentType === 'work'"
+                    v-if="props.currentType === 'break' && props.hasPendingAutoBreak"
                     variant="outline"
                 >
-                    <Coffee />
-                    {{ $t('app.break') }}
-                </Button>
-                <Button
-                    :as="Link"
-                    :disabled="loading"
-                    :href="route('menubar.storeWork')"
-                    @click="router.flushAll()"
-                    class="flex-1 shrink-0 px-0 disabled:opacity-100"
-                    method="POST"
-                    preserve-scroll
-                    preserve-state
-                    size="lg"
-                    v-if="props.currentType === 'break'"
-                >
-                    <Play />
-                    {{ $t('app.continue') }}
+                    <Undo2 />
+                    {{ $t('app.discard break') }}
                 </Button>
             </div>
         </div>

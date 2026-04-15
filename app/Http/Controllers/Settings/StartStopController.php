@@ -21,6 +21,7 @@ class StartStopController extends Controller
         return Inertia::render('Settings/StartStop/Edit', [
             'stopBreakAutomatic' => $settings->stopBreakAutomatic,
             'stopBreakAutomaticActivationTime' => $settings->stopBreakAutomaticActivationTime,
+            'stopBreakAutomaticGraceTime' => $settings->stopBreakAutomaticGraceTime,
             'stopWorkTimeReset' => $settings->stopWorkTimeReset,
             'stopBreakTimeReset' => $settings->stopBreakTimeReset,
         ]);
@@ -35,6 +36,7 @@ class StartStopController extends Controller
 
         $settings->stopBreakAutomatic = $data['stopBreakAutomatic'] ?? null;
         $settings->stopBreakAutomaticActivationTime = $data['stopBreakAutomaticActivationTime'] ?? null;
+        $settings->stopBreakAutomaticGraceTime = (int) ($data['stopBreakAutomaticGraceTime'] ?? 0);
         $settings->stopWorkTimeReset = ((int) $data['stopWorkTimeReset']) ?? null;
         $settings->stopBreakTimeReset = ((int) $data['stopBreakTimeReset']) ?? null;
         $settings->save();

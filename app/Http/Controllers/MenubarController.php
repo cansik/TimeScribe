@@ -55,6 +55,7 @@ class MenubarController extends Controller
             'currentType' => $currentType,
             'workTime' => TimestampService::getWorkTime(),
             'breakTime' => TimestampService::getBreakTime(),
+            'hasPendingAutoBreak' => TimestampService::hasPendingAutoBreak(),
             'currentProject' => fn () => $currentProject ? ProjectResource::make($currentProject) : null,
             'currentAppActivity' => fn () => $currentAppActivity ? ActivityHistoryResource::make($currentAppActivity) : null,
             'activeAppActivity' => $settings->appActivityTracking,
@@ -66,6 +67,13 @@ class MenubarController extends Controller
     public function storeBreak(): RedirectResponse
     {
         TimestampService::startBreak();
+
+        return to_route('menubar.index');
+    }
+
+    public function discardBreak(): RedirectResponse
+    {
+        TimestampService::discardAutoBreak();
 
         return to_route('menubar.index');
     }
