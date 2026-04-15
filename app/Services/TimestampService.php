@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Date;
 
 class TimestampService
 {
+    private const string PENDING_AUTO_BREAK_CACHE_KEY = 'pending_auto_break';
+
     private static function start(TimestampTypeEnum $type): void
     {
         $project = null;
@@ -70,6 +72,128 @@ class TimestampService
         self::makeEndings();
         self::start(TimestampTypeEnum::BREAK);
         TimerStopped::broadcast();
+    }
+
+    public static function startAutoBreak(int $graceTime): void
+    {
+        if ($graceTime <= 0) {
+            self::startBreak();
+
+            return;
+        }
+
+        $activeWorkTimestamp = Timestamp::whereNull('ended_at')
+            ->where('type', TimestampTypeEnum::WORK)
+            ->first();
+
+        if (! $activeWorkTimestamp) {
+            return;
+        }
+
+        self::startBreak();
+
+        $activeBreakTimestamp = Timestamp::whereNull('ended_at')
+            ->where('type', TimestampTypeEnum::BREAK)
+            ->first();
+
+        if (! $activeBreakTimestamp) {
+            return;
+        }
+
+        Cache::forever(self::PENDING_AUTO_BREAK_CACHE_KEY, [
+            'work_timestamp_id' => $activeWorkTimestamp->id,
+            'break_timestamp_id' => $activeBreakTimestamp->id,
+            'grace_time' => $graceTime,
+        ]);
+    }
+
+    public static function hasPendingAutoBreak(): bool
+    {
+        return Cache::has(self::PENDING_AUTO_BREAK_CACHE_KEY);
+    }
+
+    public static function restorePendingAutoBreak(): bool
+    {
+        $pendingAutoBreak = Cache::get(self::PENDING_AUTO_BREAK_CACHE_KEY);
+
+        if (! is_array($pendingAutoBreak)) {
+            return false;
+        }
+
+        $workTimestamp = Timestamp::find($pendingAutoBreak['work_timestamp_id'] ?? null);
+        $breakTimestamp = Timestamp::find($pendingAutoBreak['break_timestamp_id'] ?? null);
+
+        if (! $workTimestamp || ! $breakTimestamp) {
+            Cache::forget(self::PENDING_AUTO_BREAK_CACHE_KEY);
+
+            return false;
+        }
+
+        if ($workTimestamp->type !== TimestampTypeEnum::WORK || $breakTimestamp->type !== TimestampTypeEnum::BREAK) {
+            Cache::forget(self::PENDING_AUTO_BREAK_CACHE_KEY);
+
+            return false;
+        }
+
+        if ($breakTimestamp->ended_at !== null) {
+            Cache::forget(self::PENDING_AUTO_BREAK_CACHE_KEY);
+
+            return false;
+        }
+
+        $graceTime = (int) ($pendingAutoBreak['grace_time'] ?? 0);
+
+        if ($graceTime <= 0 || $breakTimestamp->started_at->copy()->addMinutes($graceTime)->lessThan(now())) {
+            return false;
+        }
+
+        Cache::forget(self::PENDING_AUTO_BREAK_CACHE_KEY);
+
+        $workTimestamp->update([
+            'ended_at' => null,
+            'last_ping_at' => now(),
+        ]);
+
+        $breakTimestamp->delete();
+
+        TimerStarted::broadcast();
+
+        return true;
+    }
+
+    public static function discardAutoBreak(): bool
+    {
+        $pendingAutoBreak = Cache::pull(self::PENDING_AUTO_BREAK_CACHE_KEY);
+
+        if (! is_array($pendingAutoBreak)) {
+            return false;
+        }
+
+        $workTimestamp = Timestamp::find($pendingAutoBreak['work_timestamp_id'] ?? null);
+        $breakTimestamp = Timestamp::find($pendingAutoBreak['break_timestamp_id'] ?? null);
+
+        if (! $workTimestamp || ! $breakTimestamp) {
+            return false;
+        }
+
+        if ($workTimestamp->type !== TimestampTypeEnum::WORK || $breakTimestamp->type !== TimestampTypeEnum::BREAK) {
+            return false;
+        }
+
+        if ($breakTimestamp->ended_at !== null) {
+            return false;
+        }
+
+        $workTimestamp->update([
+            'ended_at' => null,
+            'last_ping_at' => now(),
+        ]);
+
+        $breakTimestamp->delete();
+
+        TimerStarted::broadcast();
+
+        return true;
     }
 
     public static function stop(): void

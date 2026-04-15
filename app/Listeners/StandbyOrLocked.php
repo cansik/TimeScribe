@@ -41,7 +41,7 @@ class StandbyOrLocked
 
         if (TimestampService::getCurrentType() === TimestampTypeEnum::WORK) {
             if ($stopBreakAutomatic === 'break') {
-                TimestampService::startBreak();
+                TimestampService::startAutoBreak($settings->stopBreakAutomaticGraceTime ?? 0);
             }
             if ($stopBreakAutomatic === 'stop') {
                 TimestampService::stop();
